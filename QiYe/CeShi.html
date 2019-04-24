@@ -69,7 +69,7 @@
             //         img.style.marginLeft = "5px"
             //         images.appendChild(img)
             //     })
-            photoCompress(files[i], {quality: 0.8}, files[i].type, function (base64Codes) {
+            photoCompress(files[i], {quality: 0.5}, files[i].type, function (base64Codes) {
                 watermark([base64Codes, 'Images/shuijiao.jpg'])
                     .image(watermark.image.lowerRight())
                     .then(function (img) {
@@ -91,13 +91,19 @@
         var images = doc.getElementById("photoImages")
         var width = window.screen.width
         for (var i = 0; i < files.length; i++) {
-            watermark([URL.createObjectURL(files[i])])
-                .image(watermark.text.lowerRight('MyPhoto', width / 4 + 'px serif', 'red', 0.5))
-                .then(function (img) {
-                    img.setAttribute("style", "width: " + (width - 15) / 2 + "px; height: " + (width - 15) / 2 + "px;")
-                    img.style.marginLeft = "5px"
-                    images.appendChild(img)
-                })
+            photoCompress(files[i], {quality: 0.5}, files[i].type, function (base64Codes) {
+                var newImg = new Image()
+                newImg.src = base64Codes
+                newImg.onload = function () {
+                    watermark([base64Codes])
+                        .image(watermark.text.upperRight('自定义水印文字', newImg.width / 8 + 'px serif', 'red', 0.5 , newImg.width / 8))
+                        .then(function (img) {
+                            img.setAttribute("style", "width: " + (width - 15) / 2 + "px; height: " + (width - 15) / 2 + "px;")
+                            img.style.marginLeft = "5px"
+                            images.appendChild(img)
+                        })
+                }
+            })
         }
     }
 
