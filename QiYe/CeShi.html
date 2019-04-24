@@ -70,13 +70,15 @@
             //         images.appendChild(img)
             //     })
 
-            watermark([URL.createObjectURL(files[i]), 'Images/shuijiao.jpg'])
-                .image(watermark.image.lowerRight())
-                .then(function (img) {
-                    img.setAttribute("style", "width: " + (width - 15) / 2 + "px; height: " + (width - 15) / 2 + "px;")
-                    img.style.marginLeft = "5px"
-                    images.appendChild(img)
-                });
+            photoCompress(files[i], {quality: 0.8}, function (base64Codes) {
+                watermark([base64Codes, 'Images/shuijiao.jpg'])
+                    .image(watermark.image.lowerRight())
+                    .then(function (img) {
+                        img.setAttribute("style", "width: " + (width - 15) / 2 + "px; height: " + (width - 15) / 2 + "px;")
+                        img.style.marginLeft = "5px"
+                        images.appendChild(img)
+                    });
+            })
         }
     };
 
@@ -101,37 +103,36 @@
     }
 
     //获取上传图片并处理成正常的图片
-    function photoCompress(file,w,objDiv) {
+    function photoCompress(file, w, objDiv) {
         var ready = new FileReader();
         /*开始读取指定的Blob对象或File对象中的内容. 当读取操作完成时,readyState属性的值会成为DONE,如果设置了onloadend事件处理程序,则调用之.同时,result属性中将包含一个data: URL格式的字符串以表示所读取文件的内容.*/
-        alert(file)
         ready.readAsDataURL(file);
-        ready.onload = function() {
+        ready.onload = function () {
             var re = this.result;
-            canvasDataURL(re,w, objDiv)
+            canvasDataURL(re, w, objDiv)
         }
     }
 
     //获取上传图片的Orientation并旋转
-    function canvasDataURL(path,w, callback) {
+    function canvasDataURL(path, w, callback) {
         var img = new Image();
         var canvas = document.createElement("canvas");
-        img.onload = function() {
-            EXIF.getData(this, function() {
+        img.onload = function () {
+            EXIF.getData(this, function () {
                 Orientation = EXIF.getTag(this, 'Orientation');
                 //如果方向角不为1，都需要进行旋转
                 if (Orientation != "" && Orientation != 1 && Orientation) {
                     switch (Orientation) {
                         case 6: //需要顺时针（向左）90度旋转
                             console.log(66);
-                            rotateImg(this, 'left', canvas,w, callback);
+                            rotateImg(this, 'left', canvas, w, callback);
                             break;
                         case 8: //需要逆时针（向右）90度旋转  
-                            rotateImg(this, 'right', canvas,w, callback);
+                            rotateImg(this, 'right', canvas, w, callback);
                             break;
                         case 3: //需要180度旋转  
-                            rotateImg(this, 'right', canvas,w, callback); //转两次  
-                            rotateImg(this, 'right', canvas,w, callback);
+                            rotateImg(this, 'right', canvas, w, callback); //转两次  
+                            rotateImg(this, 'right', canvas, w, callback);
                             break;
                     }
                 } else {
@@ -143,7 +144,7 @@
     }
 
     //根据Orientation旋转图片,生成base64的文件
-    function rotateImg(img, direction, canvas, w,callback3) {
+    function rotateImg(img, direction, canvas, w, callback3) {
         //最小与最大旋转方向，图片旋转4次后回到原方向    
         var min_step = 0;
         var max_step = 3;
@@ -238,10 +239,10 @@
         });
     }
 
-    function rotateImg(img, direction,canvas,fileType) {
+    function rotateImg(img, direction, canvas, fileType) {
         var min_step = 0;
         var max_step = 3;
-        if (img == null)return;
+        if (img == null) return;
         //img的高度和宽度不能在img元素隐藏后获取，否则会出错
         var height = img.height;
         var width = img.width;
