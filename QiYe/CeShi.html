@@ -61,22 +61,27 @@
         var files = doc.getElementById("camera").files
         var images = doc.getElementById("cameraImages")
         var width = window.screen.width
+
         for (var i = 0; i < files.length; i++) {
-            // watermark([URL.createObjectURL(files[i])])
-            //     .image(watermark.text.lowerRight('MyPhoto', width + 'px serif', 'red', 0.5))
-            //     .then(function (img) {
-            //         img.setAttribute("style", "width: " + (width - 15) / 2 + "px; height: " + (width - 15) / 2 + "px;")
-            //         img.style.marginLeft = "5px"
-            //         images.appendChild(img)
-            //     })
             photoCompress(files[i], {quality: 0.5}, files[i].type, function (base64Codes) {
-                watermark([base64Codes, 'Images/shuijiao.jpg'])
-                    .image(watermark.image.lowerRight())
-                    .then(function (img) {
-                        img.setAttribute("style", "width: " + (width - 15) / 2 + "px; height: " + (width - 15) / 2 + "px;")
-                        img.style.marginLeft = "5px"
-                        images.appendChild(img)
-                    });
+                var newImg = new Image()
+                newImg.src = base64Codes
+                newImg.onload = function () {
+                    var logo = new Image()
+                    logo.src = 'Images/logo.png'
+                    logo.width = newImg.width / 4
+                    logo.height = logo.width
+                    logo.onload = function () {
+                        alert(logo.width)
+                        watermark([base64Codes, logo.src])
+                            .image(watermark.image.lowerRight())
+                            .then(function (img) {
+                                img.setAttribute("style", "width: " + (width - 15) / 2 + "px; height: " + (width - 15) / 2 + "px;")
+                                img.style.marginLeft = "5px"
+                                images.appendChild(img)
+                            });
+                    }
+                }
             })
         }
     };
