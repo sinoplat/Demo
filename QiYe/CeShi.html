@@ -71,6 +71,7 @@
             //     })
 
             photoCompress(files[i], {quality: 0.8}, function (base64Codes) {
+                alert(base64Codes)
                 watermark([base64Codes, 'Images/shuijiao.jpg'])
                     .image(watermark.image.lowerRight())
                     .then(function (img) {
@@ -105,6 +106,7 @@
     //获取上传图片并处理成正常的图片
     function photoCompress(file, w, objDiv) {
         var ready = new FileReader();
+        alert(file)
         /*开始读取指定的Blob对象或File对象中的内容. 当读取操作完成时,readyState属性的值会成为DONE,如果设置了onloadend事件处理程序,则调用之.同时,result属性中将包含一个data: URL格式的字符串以表示所读取文件的内容.*/
         ready.readAsDataURL(file);
         ready.onload = function () {
