@@ -71,13 +71,15 @@
             //     })
 
             photoCompress(files[i], {quality: 0.8}, function (base64Codes) {
-                watermark([base64Codes, 'Images/shuijiao.jpg'])
-                    .image(watermark.image.lowerRight())
-                    .then(function (img) {
+                // watermark([base64Codes, 'Images/shuijiao.jpg'])
+                //     .image(watermark.image.lowerRight())
+                //     .then(function (img) {
+                        var img = doc.createElement('img')
                         img.setAttribute("style", "width: " + (width - 15) / 2 + "px; height: " + (width - 15) / 2 + "px;")
                         img.style.marginLeft = "5px"
+                        img.src = base64Codes
                         images.appendChild(img)
-                    });
+                    // });
             })
         }
     };
