@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>拍照</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <!--<link rel="stylesheet" href="MUI/css/mui.min.css">-->
+    <link rel="stylesheet" href="MUI/css/mui.css"/>
+</head>
+<body>
+<style>
+
+</style>
+<input
+        type="file"
+        hidden
+        id="camera"
+        name="camera"
+        accept="image/*"
+        capture="camera"
+        multiple="multiple"
+/>
+<button
+        type="button"
+        class="mui-btn mui-btn-primary mui-btn-block"
+        onclick="showCamera(this)"
+>
+    <span class="button-relation-text">拍照</span>
+</button>
+<div id="cameraImages"></div>
+
+<input
+        type="file"
+        hidden
+        id="photo"
+        name="photo"
+        accept="image/*"
+        multiple="multiple"
+/>
+<button
+        type="button"
+        class="mui-btn mui-btn-primary mui-btn-block"
+        onclick="showPhoto(this)"
+>
+    <span class="button-relation-text">图片</span>
+</button>
+<div id="photoImages"></div>
+
+<script src="MUI/js/mui.js" type="text/javascript"></script>
+<script src="Watermark/watermark.js" type="text/javascript"></script>
+<script src="Exif/exif.js" type="text/javascript"></script>
+<script type="text/javascript">
+    function showCamera(object) {
+        document.getElementById("camera").click()
+    }
+
+    document.getElementById("camera").onchange = function (event) {
+        var doc = document
+        var files = doc.getElementById("camera").files
+        var images = doc.getElementById("cameraImages")
+        var width = window.screen.width
+        for (var i = 0; i < files.length; i++) {
+            // watermark([URL.createObjectURL(files[i])])
+            //     .image(watermark.text.lowerRight('MyPhoto', width + 'px serif', 'red', 0.5))
+            //     .then(function (img) {
+            //         img.setAttribute("style", "width: " + (width - 15) / 2 + "px; height: " + (width - 15) / 2 + "px;")
+            //         img.style.marginLeft = "5px"
+            //         images.appendChild(img)
+            //     })
+
+            watermark([URL.createObjectURL(files[i]), 'Images/shuijiao.jpg'])
+                .image(watermark.image.lowerRight())
+                .then(function (img) {
+                    img.setAttribute("style", "width: " + (width - 15) / 2 + "px; height: " + (width - 15) / 2 + "px;")
+                    img.style.marginLeft = "5px"
+                    images.appendChild(img)
+                });
+        }
+    };
+
+    function showPhoto(object) {
+        document.getElementById("photo").click()
+    }
+
+    document.getElementById("photo").onchange = function () {
+        var doc = document
+        var files = doc.getElementById("photo").files
+        var images = doc.getElementById("photoImages")
+        var width = window.screen.width
+        for (var i = 0; i < files.length; i++) {
+            watermark([URL.createObjectURL(files[i])])
+                .image(watermark.text.lowerRight('MyPhoto', width / 4 + 'px serif', 'red', 0.5))
+                .then(function (img) {
+                    img.setAttribute("style", "width: " + (width - 15) / 2 + "px; height: " + (width - 15) / 2 + "px;")
+                    img.style.marginLeft = "5px"
+                    images.appendChild(img)
+                })
+        }
+    }
+
+    //获取上传图片并处理成正常的图片
+    function photoCompress(file,w,objDiv) {
+        var ready = new FileReader();
+        /*开始读取指定的Blob对象或File对象中的内容. 当读取操作完成时,readyState属性的值会成为DONE,如果设置了onloadend事件处理程序,则调用之.同时,result属性中将包含一个data: URL格式的字符串以表示所读取文件的内容.*/
+        alert(file)
+        ready.readAsDataURL(file);
+        ready.onload = function() {
+            var re = this.result;
+            canvasDataURL(re,w, objDiv)
+        }
+    }
+
+    //获取上传图片的Orientation并旋转
+    function canvasDataURL(path,w, callback) {
+        var img = new Image();
+        var canvas = document.createElement("canvas");
+        img.onload = function() {
+            EXIF.getData(this, function() {
+                Orientation = EXIF.getTag(this, 'Orientation');
+                //如果方向角不为1，都需要进行旋转
+                if (Orientation != "" && Orientation != 1 && Orientation) {
+                    switch (Orientation) {
+                        case 6: //需要顺时针（向左）90度旋转
+                            console.log(66);
+                            rotateImg(this, 'left', canvas,w, callback);
+                            break;
+                        case 8: //需要逆时针（向右）90度旋转  
+                            rotateImg(this, 'right', canvas,w, callback);
+                            break;
+                        case 3: //需要180度旋转  
+                            rotateImg(this, 'right', canvas,w, callback); //转两次  
+                            rotateImg(this, 'right', canvas,w, callback);
+                            break;
+                    }
+                } else {
+                    callback(path);
+                }
+            });
+        }
+        img.src = path;
+    }
+
+    //根据Orientation旋转图片,生成base64的文件
+    function rotateImg(img, direction, canvas, w,callback3) {
+        //最小与最大旋转方向，图片旋转4次后回到原方向    
+        var min_step = 0;
+        var max_step = 3;
+        if (img == null) return;
+        //img的高度和宽度不能在img元素隐藏后获取，否则会出错    
+        var height = img.height;
+        var width = img.width;
+        var step = 2;
+        if (step == null) {
+            step = min_step;
+        }
+        if (direction == 'right') {
+            step++;
+            //旋转到原位置，即超过最大值    
+            step > max_step && (step = min_step);
+        } else {
+            step--;
+            step < min_step && (step = max_step);
+        }
+        //旋转角度以弧度值为参数    
+        var degree = step * 90 * Math.PI / 180;
+        var ctx = canvas.getContext('2d');
+        switch (step) {
+            case 0:
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0);
+                break;
+            case 1:
+                canvas.width = height;
+                canvas.height = width;
+                ctx.rotate(degree);
+                ctx.drawImage(img, 0, -height);
+                break;
+            case 2:
+                canvas.width = width;
+                canvas.height = height;
+                ctx.rotate(degree);
+                ctx.drawImage(img, -width, -height);
+                break;
+            case 3:
+                canvas.width = height;
+                canvas.height = width;
+                ctx.rotate(degree);
+                ctx.drawImage(img, -width, 0);
+                break;
+        }
+        dat = canvas.toDataURL("image/jpeg", w.quality);
+
+
+        callback3(dat)
+    };
+
+    function reverseImgData(image) {
+        var w = image.width
+        var h = image.height
+        var con = 0
+        for (var i = 0; i < h / 2; i++) {
+            for (var j = 0; j < w * 4; j++) {
+                con = image.data[i * w * 4 + j]
+                image.data[i * w * 4 + j] = image.data[(h - i - 1) * w * 4 + j]
+                image.data[(h - i - 1) * w * 4 + j] = con
+            }
+        }
+        return image
+    }
+
+    function compress(img, fileType) {
+        var canvas = document.createElement("canvas");
+        var rotateshow;
+        EXIF.getData(img, function () {
+            EXIF.getAllTags(img);
+            Orientation = EXIF.getTag(img, 'Orientation');
+            switch (Orientation) {
+                case 6:
+                    console.log(6)
+                    rotateshow = rotateImg(img, 'left', canvas, fileType);
+                    break;
+                case 8:
+                    console.log(8)
+                    rotateshow = rotateImg(img, 'right', canvas, fileType);
+                    break;
+                case 3:
+                    console.log(3)
+                    rotateImg(img, 'right', canvas, fileType);
+                    rotateshow = rotateImg(img, 'right', canvas, fileType);
+                    break;
+                default:
+                    console.log(0)
+                    rotateshow = img.src;
+            }
+        });
+    }
+
+    function rotateImg(img, direction,canvas,fileType) {
+        var min_step = 0;
+        var max_step = 3;
+        if (img == null)return;
+        //img的高度和宽度不能在img元素隐藏后获取，否则会出错
+        var height = img.height;
+        var width = img.width;
+        var step = 2;
+        if (step == null) {
+            step = min_step;
+        }
+        if (direction == 'right') {
+            step++;
+            //旋转到原位置，即超过最大值
+            step > max_step && (step = min_step);
+        } else {
+            step--;
+            step < min_step && (step = max_step);
+        }
+        var degree = step * 90 * Math.PI / 180;
+        var ctx = canvas.getContext('2d');
+        switch (step) {
+            case 0:
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0);
+                break;
+            case 1:
+                canvas.width = height;
+                canvas.height = width;
+                ctx.rotate(degree);
+                ctx.drawImage(img, 0, -height);
+                break;
+            case 2:
+                canvas.width = width;
+                canvas.height = height;
+                ctx.rotate(degree);
+                ctx.drawImage(img, -width, -height);
+                break;
+            case 3:
+                canvas.width = height;
+                canvas.height = width;
+                ctx.rotate(degree);
+                ctx.drawImage(img, -width, 0);
+                break;
+        }
+        return canvas.toDataURL(fileType, 0.75);
+    }
+
+</script>
+</body>
+</html>
