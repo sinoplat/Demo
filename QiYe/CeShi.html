@@ -69,10 +69,9 @@
                 newImg.onload = function () {
                     var logo = new Image()
                     logo.src = 'Images/logo.png'
-                    logo.width = newImg.width / 4
+                    logo.width = newImg.width / 2
                     logo.height = logo.width
                     logo.onload = function () {
-                        alert(logo.width)
                         watermark([base64Codes, logo.src])
                             .image(watermark.image.lowerRight())
                             .then(function (img) {
