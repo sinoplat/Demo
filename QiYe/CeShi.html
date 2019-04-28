@@ -1,215 +1,313 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8"/>
+  <head>
+    <meta charset="utf-8" />
     <title>水印</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no"/>
-    <meta name="apple-mobile-web-app-capable" content="yes"/>
-    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <!--<link rel="stylesheet" href="MUI/css/mui.min.css">-->
-    <link rel="stylesheet" href="MUI/css/mui.css"/>
-</head>
-<body>
-<style>
+    <link rel="stylesheet" href="MUI/css/mui.css" />
+  </head>
+  <body>
+    <style></style>
+    <input
+      type="file"
+      hidden
+      id="camera"
+      name="camera"
+      accept="image/*"
+      multiple="multiple"
+    />
+    <button
+      type="button"
+      class="mui-btn mui-btn-primary mui-btn-block"
+      onclick="showCamera(this)"
+    >
+      <span class="button-relation-text">图片水印</span>
+    </button>
+    <div id="cameraImages"></div>
 
-</style>
-<input
-        type="file"
-        hidden
-        id="camera"
-        name="camera"
-        accept="image/*"
-        multiple="multiple"
-/>
-<button
-        type="button"
-        class="mui-btn mui-btn-primary mui-btn-block"
-        onclick="showCamera(this)"
->
-    <span class="button-relation-text">图片水印</span>
-</button>
-<div id="cameraImages"></div>
+    <input
+      type="file"
+      hidden
+      id="photo"
+      name="photo"
+      accept="image/*"
+      multiple="multiple"
+    />
+    <button
+      type="button"
+      class="mui-btn mui-btn-primary mui-btn-block"
+      onclick="showPhoto(this)"
+    >
+      <span class="button-relation-text">文字水印</span>
+    </button>
+    <div id="photoImages"></div>
 
-<input
-        type="file"
-        hidden
-        id="photo"
-        name="photo"
-        accept="image/*"
-        multiple="multiple"
-/>
-<button
-        type="button"
-        class="mui-btn mui-btn-primary mui-btn-block"
-        onclick="showPhoto(this)"
->
-    <span class="button-relation-text">文字水印</span>
-</button>
-<div id="photoImages"></div>
+    <div class="mui-input-row">
+      <label>数据</label>
+      <input
+        type="text"
+        class="mui-input-clear"
+        id="save_info"
+        placeholder="请输入"
+      />
+    </div>
+    <button
+      type="button"
+      class="mui-btn mui-btn-primary mui-btn-block"
+      onclick="setSaveInfo(this)"
+    >
+      <span class="button-relation-text">存储输入的数据</span>
+    </button>
+    <button
+      type="button"
+      class="mui-btn mui-btn-primary mui-btn-block"
+      onclick="showSaveInfo(this)"
+    >
+      <span class="button-relation-text">展示存储的数据</span>
+    </button>
+    <button
+      type="button"
+      class="mui-btn mui-btn-primary mui-btn-block"
+      onclick="getUserInfo(this)"
+    >
+      <span class="button-relation-text">获取用户信息</span>
+    </button>
 
-<script src="MUI/js/mui.js" type="text/javascript"></script>
-<script src="Watermark/watermark.js" type="text/javascript"></script>
-<script src="Exif/exif.js" type="text/javascript"></script>
-<script type="text/javascript">
-    function showCamera(object) {
-        document.getElementById("camera").click()
-    }
+    <script src="MUI/js/httprequest.js" type="text/javascript"></script>
+    <script src="MUI/js/mui.js" type="text/javascript"></script>
+    <script src="Watermark/watermark.js" type="text/javascript"></script>
+    <script src="Exif/exif.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      function showCamera(object) {
+        document.getElementById("camera").click();
+      }
 
-    document.getElementById("camera").onchange = function (event) {
-        var doc = document
-        var files = doc.getElementById("camera").files
-        var images = doc.getElementById("cameraImages")
-        var width = window.screen.width
+      document.getElementById("camera").onchange = function(event) {
+        var doc = document;
+        var files = doc.getElementById("camera").files;
+        var images = doc.getElementById("cameraImages");
+        var width = window.screen.width;
 
         for (var i = 0; i < files.length; i++) {
-            photoCompress(files[i], {quality: 0.5}, files[i].type, function (base64Codes) {
-                var newImg = new Image()
-                newImg.src = base64Codes
-                newImg.onload = function () {
-                    var canvas = document.createElement("canvas")
-                    var ctx = canvas.getContext('2d')
-                    var logo = new Image()
-                    logo.src = 'Images/logo.png'
-                    logo.onload = function () {
-                        logo.width = newImg.width / 2
-                        logo.height = logo.width
-                        canvas.width = logo.width
-                        canvas.height = logo.height
-                        ctx.drawImage(logo, 0, 0, logo.width, logo.height)
-                        var newlogo = canvas.toDataURL(logo.type, 0.5)
-                        watermark([base64Codes, newlogo])
-                            .image(watermark.image.lowerRight())
-                            .then(function (img) {
-                                img.setAttribute("style", "width: " + (width - 15) / 2 + "px; height: " + (width - 15) / 2 + "px;")
-                                img.style.marginLeft = "5px"
-                                images.appendChild(img)
-                            });
-                    }
-                }
-            })
+          photoCompress(files[i], { quality: 0.5 }, files[i].type, function(
+            base64Codes
+          ) {
+            var newImg = new Image();
+            newImg.src = base64Codes;
+            newImg.onload = function() {
+              var canvas = document.createElement("canvas");
+              var ctx = canvas.getContext("2d");
+              var logo = new Image();
+              logo.src = "Images/logo.png";
+              logo.onload = function() {
+                logo.width = newImg.width / 2;
+                logo.height = logo.width;
+                canvas.width = logo.width;
+                canvas.height = logo.height;
+                ctx.drawImage(logo, 0, 0, logo.width, logo.height);
+                var newlogo = canvas.toDataURL(logo.type, 0.5);
+                watermark([base64Codes, newlogo])
+                  .image(watermark.image.lowerRight())
+                  .then(function(img) {
+                    img.setAttribute(
+                      "style",
+                      "width: " +
+                        (width - 15) / 2 +
+                        "px; height: " +
+                        (width - 15) / 2 +
+                        "px;"
+                    );
+                    img.style.marginLeft = "5px";
+                    images.appendChild(img);
+                  });
+              };
+            };
+          });
         }
-    };
+      };
 
-    function showPhoto(object) {
-        document.getElementById("photo").click()
-    }
+      function showPhoto(object) {
+        document.getElementById("photo").click();
+      }
 
-    document.getElementById("photo").onchange = function () {
-        var doc = document
-        var files = doc.getElementById("photo").files
-        var images = doc.getElementById("photoImages")
-        var width = window.screen.width
+      document.getElementById("photo").onchange = function() {
+        var doc = document;
+        var files = doc.getElementById("photo").files;
+        var images = doc.getElementById("photoImages");
+        var width = window.screen.width;
         for (var i = 0; i < files.length; i++) {
-            photoCompress(files[i], {quality: 0.5}, files[i].type, function (base64Codes) {
-                var newImg = new Image()
-                newImg.src = base64Codes
-                newImg.onload = function () {
-                    watermark([base64Codes])
-                        .image(watermark.text.upperRight('自定义水印文字', newImg.width / 8 + 'px serif', 'red', 0.5, newImg.width / 8))
-                        .then(function (img) {
-                            img.setAttribute("style", "width: " + (width - 15) / 2 + "px; height: " + (width - 15) / 2 + "px;")
-                            img.style.marginLeft = "5px"
-                            images.appendChild(img)
-                        })
-                }
-            })
+          photoCompress(files[i], { quality: 0.5 }, files[i].type, function(
+            base64Codes
+          ) {
+            var newImg = new Image();
+            newImg.src = base64Codes;
+            newImg.onload = function() {
+              watermark([base64Codes])
+                .image(
+                  watermark.text.upperRight(
+                    "自定义水印文字",
+                    newImg.width / 8 + "px serif",
+                    "red",
+                    0.5,
+                    newImg.width / 8
+                  )
+                )
+                .then(function(img) {
+                  img.setAttribute(
+                    "style",
+                    "width: " +
+                      (width - 15) / 2 +
+                      "px; height: " +
+                      (width - 15) / 2 +
+                      "px;"
+                  );
+                  img.style.marginLeft = "5px";
+                  images.appendChild(img);
+                });
+            };
+          });
         }
-    }
+      };
 
-    //获取上传图片并处理成正常的图片
-    function photoCompress(file, w, type, objDiv) {
+      //获取上传图片并处理成正常的图片
+      function photoCompress(file, w, type, objDiv) {
         var ready = new FileReader();
         /*开始读取指定的Blob对象或File对象中的内容. 当读取操作完成时,readyState属性的值会成为DONE,如果设置了onloadend事件处理程序,则调用之.同时,result属性中将包含一个data: URL格式的字符串以表示所读取文件的内容.*/
         ready.readAsDataURL(file);
-        ready.onload = function () {
-            var re = this.result;
-            canvasDataURL(re, w, type, objDiv)
-        }
-    }
+        ready.onload = function() {
+          var re = this.result;
+          canvasDataURL(re, w, type, objDiv);
+        };
+      }
 
-    //获取上传图片的Orientation并旋转
-    function canvasDataURL(path, w, type, callback) {
+      //获取上传图片的Orientation并旋转
+      function canvasDataURL(path, w, type, callback) {
         var img = new Image();
         var canvas = document.createElement("canvas");
-        img.onload = function () {
-            EXIF.getData(this, function () {
-                Orientation = EXIF.getTag(this, 'Orientation');
-                //如果方向角不为1，都需要进行旋转
-                if (Orientation != "" && Orientation != 1 && Orientation) {
-                    switch (Orientation) {
-                        case 6: //需要顺时针（向左）90度旋转
-                            console.log(66);
-                            rotateImg(this, 'left', canvas, w, type, callback);
-                            break;
-                        case 8: //需要逆时针（向右）90度旋转  
-                            rotateImg(this, 'right', canvas, w, type, callback);
-                            break;
-                        case 3: //需要180度旋转  
-                            rotateImg(this, 'right', canvas, w, type, callback); //转两次  
-                            rotateImg(this, 'right', canvas, w, type, callback);
-                            break;
-                    }
-                } else {
-                    callback(path);
-                }
-            });
-        }
+        img.onload = function() {
+          EXIF.getData(this, function() {
+            Orientation = EXIF.getTag(this, "Orientation");
+            //如果方向角不为1，都需要进行旋转
+            if (Orientation != "" && Orientation != 1 && Orientation) {
+              switch (Orientation) {
+                case 6: //需要顺时针（向左）90度旋转
+                  console.log(66);
+                  rotateImg(this, "left", canvas, w, type, callback);
+                  break;
+                case 8: //需要逆时针（向右）90度旋转
+                  rotateImg(this, "right", canvas, w, type, callback);
+                  break;
+                case 3: //需要180度旋转
+                  rotateImg(this, "right", canvas, w, type, callback); //转两次
+                  rotateImg(this, "right", canvas, w, type, callback);
+                  break;
+              }
+            } else {
+              callback(path);
+            }
+          });
+        };
         img.src = path;
-    }
+      }
 
-    //根据Orientation旋转图片,生成base64的文件
-    function rotateImg(img, direction, canvas, w, type, callback) {
-        //最小与最大旋转方向，图片旋转4次后回到原方向    
+      //根据Orientation旋转图片,生成base64的文件
+      function rotateImg(img, direction, canvas, w, type, callback) {
+        //最小与最大旋转方向，图片旋转4次后回到原方向
         var min_step = 0;
         var max_step = 3;
         if (img == null) return;
-        //img的高度和宽度不能在img元素隐藏后获取，否则会出错    
+        //img的高度和宽度不能在img元素隐藏后获取，否则会出错
         var height = img.height;
         var width = img.width;
         var step = 2;
         if (step == null) {
-            step = min_step;
+          step = min_step;
         }
-        if (direction == 'right') {
-            step++;
-            //旋转到原位置，即超过最大值    
-            step > max_step && (step = min_step);
+        if (direction == "right") {
+          step++;
+          //旋转到原位置，即超过最大值
+          step > max_step && (step = min_step);
         } else {
-            step--;
-            step < min_step && (step = max_step);
+          step--;
+          step < min_step && (step = max_step);
         }
-        //旋转角度以弧度值为参数    
-        var degree = step * 90 * Math.PI / 180;
-        var ctx = canvas.getContext('2d');
+        //旋转角度以弧度值为参数
+        var degree = (step * 90 * Math.PI) / 180;
+        var ctx = canvas.getContext("2d");
         switch (step) {
-            case 0:
-                canvas.width = width;
-                canvas.height = height;
-                ctx.drawImage(img, 0, 0);
-                break;
-            case 1:
-                canvas.width = height;
-                canvas.height = width;
-                ctx.rotate(degree);
-                ctx.drawImage(img, 0, -height);
-                break;
-            case 2:
-                canvas.width = width;
-                canvas.height = height;
-                ctx.rotate(degree);
-                ctx.drawImage(img, -width, -height);
-                break;
-            case 3:
-                canvas.width = height;
-                canvas.height = width;
-                ctx.rotate(degree);
-                ctx.drawImage(img, -width, 0);
-                break;
+          case 0:
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0);
+            break;
+          case 1:
+            canvas.width = height;
+            canvas.height = width;
+            ctx.rotate(degree);
+            ctx.drawImage(img, 0, -height);
+            break;
+          case 2:
+            canvas.width = width;
+            canvas.height = height;
+            ctx.rotate(degree);
+            ctx.drawImage(img, -width, -height);
+            break;
+          case 3:
+            canvas.width = height;
+            canvas.height = width;
+            ctx.rotate(degree);
+            ctx.drawImage(img, -width, 0);
+            break;
         }
         dat = canvas.toDataURL(type, w.quality);
-        callback(dat)
-    };
+        callback(dat);
+      }
+      function getUserInfo() {
+        ajax({
+          url: "https://qyapi.weixin.qq.com/cgi-bin/gettoken", //请求地址
+          type: "POST", //请求方式
+          data: {
+            corpid: "corpid",
+            corpsecret: "secrect"
+          }, //请求参数
+          success: function(response, xml) {
+            console.log(response); //   此处执行请求成功后的回调
+          },
+          fail: function(status) {
+            console.log("状态码为" + status); // 此处为请求失败后的回调
+          }
+        });
+        // httpGet(
+        //   "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=id&corpsecret=secrect",
+        //   30 * 1000,
+        //   function(response) {
+        //     alert(response); //   此处执行请求成功后
+        //   },
+        //   function(response) {
+        //     alert(response); //   此处执行请求失败后
+        //   }
+        // );
+      }
 
-</script>
-</body>
+      function setSaveInfo(object) {
+        var doc = document;
+        var value = doc.getElementById("save_info").value;
+        localStorage.setItem("key", value);
+      }
+      function showSaveInfo(object) {
+        var value = localStorage.getItem("key", "");
+        alert(value);
+
+        //  localStorage.removeItem("key")
+
+        //  localStorage.clear()
+      }
+    </script>
+  </body>
 </html>
