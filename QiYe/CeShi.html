@@ -95,10 +95,10 @@
             code: code
           }, //请求参数
           success: function(response, xml) {
-            console.log(response); //   此处执行请求成功后的回调
+              alert(response)
           },
           fail: function(status) {
-            console.log("状态码为" + status); // 此处为请求失败后的回调
+              alert(response)
           }
         });
     } 
