@@ -269,32 +269,52 @@
         callback(dat);
       }
       function getUserInfo() {
-        ajax({
-          url: "https://qyapi.weixin.qq.com/cgi-bin/gettoken", //请求地址
-          type: "POST", //请求方式
-          data: {
-            corpid: "corpid",
-            corpsecret: "secrect"
-          }, //请求参数
-          success: function(response, xml) {
-            console.log(response); //   此处执行请求成功后的回调
-          },
-          fail: function(status) {
-            console.log("状态码为" + status); // 此处为请求失败后的回调
-          }
-        });
-        // httpGet(
-        //   "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=id&corpsecret=secrect",
-        //   30 * 1000,
-        //   function(response) {
-        //     alert(response); //   此处执行请求成功后
+        // ajax({
+        //   url: "https://qyapi.weixin.qq.com/cgi-bin/gettoken", //请求地址
+        //   type: "POST", //请求方式
+        //   data: {
+        //     corpid: "corpid",
+        //     corpsecret: "secrect"
+        //   }, //请求参数
+        //   success: function(response, xml) {
+        //     console.log(response); //   此处执行请求成功后的回调
         //   },
-        //   function(response) {
-        //     alert(response); //   此处执行请求失败后
+        //   fail: function(status) {
+        //     console.log("状态码为" + status); // 此处为请求失败后的回调
         //   }
-        // );
+        // });
+        httpGet(
+          "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wwdd65d710ecd7378b&redirect_uri=REDIRECT_URI&response_type=code&scope=snsapi_userinfo&agentid=1000002&state=STATE#wechat_redirect",
+          30 * 1000,
+          function(response) {
+            alert(response); //   此处执行请求成功后
+          },
+          function(response) {
+            alert(response); //   此处执行请求失败后
+          }
+        );
       }
 
+      function httpGet(url, time, callback, failcallback) {
+        var request = new XMLHttpRequest();
+        var timeout = false;
+        var timer = setTimeout(function() {
+          timeout = true;
+          request.abort();
+        }, time);
+        request.open("GET", url);
+        request.onreadystatechange = function() {
+          if (request.readyState !== 4) return;
+          if (timeout) return;
+          clearTimeout(timer);
+          if (request.status === 200) {
+            callback(request.responseText);
+          } else {
+            failcallback(request.status);
+          }
+        };
+        request.send(null);
+      }
       function setSaveInfo(object) {
         var doc = document;
         var value = doc.getElementById("save_info").value;
