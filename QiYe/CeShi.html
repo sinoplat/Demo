@@ -84,6 +84,41 @@
     <script src="Watermark/watermark.js" type="text/javascript"></script>
     <script src="Exif/exif.js" type="text/javascript"></script>
     <script type="text/javascript">
+    window.onload=function(){
+        alert(getParam("code"));
+        var code =getParam("code");
+         ajax({
+           url: "https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo", //请求地址
+           type: "GET", //请求方式
+          data: {
+            access_token: "Watz7ve3IqoXTB1QUQXd55zkAKpiAfCxe-jw9mdA3xdEkOezbf2d3NepH7MSkZngTynd7GLGwkN7lUsJrF-7KVZxS8OjqSsByn073BIoYbNA5xEzYNsi3rysnAzgsNoK_2Wbq-RJjE6CxcSdcJI0kP2ZNslEw4BFbseYAetafLQHHYGqxYMyOmd3-V1sYmnu8w_BWamBly9ZqJHsgGb2oA",
+            code: code
+          }, //请求参数
+          success: function(response, xml) {
+            console.log(response); //   此处执行请求成功后的回调
+          },
+          fail: function(status) {
+            console.log("状态码为" + status); // 此处为请求失败后的回调
+          }
+        });
+    } 
+    
+    /**
+        * 获取指定的URL参数值
+        * URL:http://www.quwan.com/index?name=tyler
+        * 参数：paramName URL参数
+        * 调用方法:getParam("name")
+        * 返回值:tyler
+    */
+    function getParam(paramName) {  //code  获取用户code
+        paramValue = "", isFound = !1;
+            if (this.location.search.indexOf("?") == 0 && this.location.search.indexOf("=") > 1) {
+            arrSource = unescape(this.location.search).substring(1, this.location.search.length).split("&"), i = 0;
+            while (i < arrSource.length && !isFound) arrSource[i].indexOf("=") > 0 && arrSource[i].split("=")[0].toLowerCase() == paramName.toLowerCase() && (paramValue = arrSource[i].split("=")[1], isFound = !0), i++
+        }
+        return paramValue == "" && (paramValue = null), paramValue
+    }
+
       function showCamera(object) {
         document.getElementById("camera").click();
       }
@@ -283,16 +318,18 @@
         //     console.log("状态码为" + status); // 此处为请求失败后的回调
         //   }
         // });
-        httpGet(
-          "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wwdd65d710ecd7378b&redirect_uri=REDIRECT_URI&response_type=code&scope=snsapi_userinfo&agentid=1000002&state=STATE#wechat_redirect",
-          30 * 1000,
-          function(response) {
-            alert(response); //   此处执行请求成功后
-          },
-          function(response) {
-            alert(response); //   此处执行请求失败后
-          }
-        );
+        var url = "https://sinoplat.github.io/Demo/QiYe/CeShi.html";
+        document.location = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wwdd65d710ecd7378b&redirect_uri=url&response_type=code&scope=snsapi_userinfo&agentid=1000002&state=STATE#wechat_redirect";
+        // httpGet(
+        //   "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wwdd65d710ecd7378b&redirect_uri=www.baidu.com&response_type=code&scope=snsapi_userinfo&agentid=1000002&state=STATE#wechat_redirect",
+        //   30 * 1000,
+        //   function(response) {
+        //     alert(response); //   此处执行请求成功后
+        //   },
+        //   function(response) {
+        //     alert(response); //   此处执行请求失败后
+        //   }
+        // );
       }
 
       function httpGet(url, time, callback, failcallback) {
