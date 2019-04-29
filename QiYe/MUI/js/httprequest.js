@@ -49,7 +49,7 @@ function ajax(options) {
     xhr.send(null);
   } else if (options.type == "POST") {
     xhr.open("POST", options.url, options.async);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.setRequestHeader("Content-Type", "application/json");
     xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
     xhr.send(params);
   }

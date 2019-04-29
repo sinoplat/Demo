@@ -74,6 +74,15 @@
     <button
       type="button"
       class="mui-btn mui-btn-primary mui-btn-block"
+      onclick="cameraTimes(this)"
+    >
+      <span class="button-relation-text">连拍</span>
+    </button>
+
+    <button
+      <button
+      type="button"
+      class="mui-btn mui-btn-primary mui-btn-block"
       onclick="login(this)"
     >
       <span class="button-relation-text">登录</span>
@@ -82,23 +91,54 @@
     <button
       type="button"
       class="mui-btn mui-btn-primary mui-btn-block"
-      onclick="getUserInfo(this)"
+      onclick="getToken(this)"
     >
       <span class="button-relation-text">获取用户信息</span>
     </button>
 
     <script src="MUI/js/httprequest.js" type="text/javascript"></script>
     <script src="MUI/js/mui.js" type="text/javascript"></script>
+    <script src="MUI/js/wx_sdk.js" type="text/javascript"></script>
     <script src="Watermark/watermark.js" type="text/javascript"></script>
     <script src="Exif/exif.js" type="text/javascript"></script>
     <script type="text/javascript">
+      var corpid = "wwdd65d710ecd7378b";
+      var corpsecret = "bbvFXIOgGAvakCypfam6GWz30K-ej6ceguMcDL18O60";
       window.onload = function() {
         alert(getParam("code"));
         var doc = document;
         var code = getParam("code");
         localStorage.setItem("code", code);
       };
-
+      function cameraTimes(object) {
+        var doc = document;
+        var images = doc.getElementById("cameraImages");
+        wx.chooseImage({
+          count: 1, // 默认9
+          sizeType: ["original", "compressed"], // 可以指定是原图还是压缩图，默认二者都有
+          sourceType: ["album", "camera"], // 可以指定来源是相册还是相机，默认二者都有
+          defaultCameraMode: "batch", //表示进入拍照界面的默认模式，目前有normal与batch两种选择，normal表示普通单拍模式，batch表示连拍模式，不传该参数则为normal模式。（注：用户进入拍照界面仍然可自由切换两种模式）
+          isSaveToAlbum: 1, //整型值，0表示拍照时不保存到系统相册，1表示自动保存，默认值是1
+          success: function(res) {
+            var localIds = res.localIds; // 返回选定照片的本地ID列表，
+            alert(localIds);
+            var newImg = new Image();
+            newImg.src = localIds;
+            newImg.setAttribute(
+              "style",
+              "width: " +
+                (width - 15) / 2 +
+                "px; height: " +
+                (width - 15) / 2 +
+                "px;"
+            );
+            newImg.style.marginLeft = "5px";
+            images.appendChild(newImg);
+            // andriod中localId可以作为img标签的src属性显示图片；
+            // iOS应当使用 getLocalImgData 获取图片base64数据，从而用于img标签的显示（在img标签内使用 wx.chooseImage 的 localid 显示可能会不成功）
+          }
+        });
+      }
       /**
        * 获取指定的URL参数值
        * URL:http://www.quwan.com/index?name=tyler
@@ -320,7 +360,7 @@
       function getUserInfo() {
         var code = localStorage.getItem("code", "");
         alert(code);
-
+        code = "oCv9srIpexv3rQkaj4Al9Epnsw9Ug7dsYOirDBOXw1I";
         ajax({
           url: "https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo", //请求地址
           type: "GET", //请求方式
@@ -348,6 +388,23 @@
         // );
       }
 
+      function getToken() {
+        ajax({
+          url: "https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo", //请求地址
+          type: "GET", //请求方式
+          data: {
+            corpid: corpid,
+            corpsecret: corpsecret
+          }, //请求参数
+          success: function(response, xml) {
+            alert(response);
+            getUserInfo();
+          },
+          fail: function(status) {
+            alert(status);
+          }
+        });
+      }
       function httpGet(url, time, callback, failcallback) {
         var request = new XMLHttpRequest();
         var timeout = false;
